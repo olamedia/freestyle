@@ -1,1 +1,2 @@
-# freestyle
+# Freestyle
+Freestyle framework
