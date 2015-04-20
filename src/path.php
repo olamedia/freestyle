@@ -18,7 +18,7 @@ class path{
     public function __construct($path = ''){
         $path = strval($path);
         $this->_segments = \explode('/', $path);
-        $this->_segments = \array_map('urldecode', $this->_segments);
+        $this->_segments = \array_map('rawurldecode', $this->_segments);
         if (\count($this->_segments)){
             if ('' === \reset($this->_segments)){
                 $this->_isAbsolute = true;
@@ -101,6 +101,6 @@ class path{
         if (!\count($this->_segments)){
             return ($this->_isAbsolute||$this->_isClosed?'/':'');
         }
-        return ($this->_isAbsolute?'/':'').\implode('/', \array_map('urlencode', $this->_segments)).($this->_isClosed?'/':'');
+        return ($this->_isAbsolute?'/':'').\implode('/', \array_map('rawurlencode', $this->_segments)).($this->_isClosed?'/':'');
     }
 }
