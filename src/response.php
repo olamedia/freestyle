@@ -55,6 +55,7 @@ class response{
     public static function redirect($location, $code = 303){
         self::_preventLoop($location);
         \ignore_user_abort(true);
+        \session_write_close();
         \header('Location: '.$location, true, $code);
         self::on($code);
     }
