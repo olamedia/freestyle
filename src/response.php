@@ -52,13 +52,17 @@ class response{
             self::setStatus(500);
         }
     }
-    public static function movedPermanently($location){
+    public static function redirect($location, $code = 303){
         self::_preventLoop($location);
-        \header('Location: '.$location, true, 301);
+        \ignore_user_abort(true);
+        \header('Location: '.$location, true, $code);
+        self::on($code);
+    }
+    public static function movedPermanently($location){
+        self::redirect($location, 301);
     }
     public static function seeOther($location){
-        self::_preventLoop($location);
-        \header('Location: '.$location, true, 303);
+        self::redirect($location, 303);
     }
     public static function notModified(){
         self::setStatus(304);
