@@ -83,9 +83,12 @@ class controller{
     public static function setActionController($parent, $action, $class){
         // TODO
     }
-    private static $_forceNotFound = false;
+    private $_forceNotFound = false;
     public function notFound(){
-        self::$_forceNotFound = true;
+        $this->_forceNotFound = true;
+        if ($this->_parent){
+            $this->_parent->notFound();
+        }
     }
     public function preRoute(){
     }
@@ -166,7 +169,7 @@ class controller{
                 \call_user_func_array(array($this, $initMethod), $this->_getArgs($initMethod));
             }
         }
-        if (self::$_forceNotFound){
+        if ($this->_forceNotFound){
             $methodFound = false;
         }
         if ($methodFound){
