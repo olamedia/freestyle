@@ -54,11 +54,11 @@ class response{
     }
     public static function movedPermanently($location){
         self::_preventLoop($location);
-        header('Location: '.$location, true, 301);
+        \header('Location: '.$location, true, 301);
     }
     public static function seeOther($location){
         self::_preventLoop($location);
-        header('Location: '.$location, true, 303);
+        \header('Location: '.$location, true, 303);
     }
     public static function notModified(){
         self::setStatus(304);
