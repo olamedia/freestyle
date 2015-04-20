@@ -155,8 +155,6 @@ class controller{
         if (\method_exists($this, $showMethod)){
             $methodFound = true;
             \session_write_close();
-            ob_implicit_flush(true);
-            ob_end_flush();
             $this->_header();
             \call_user_func_array(array($this, $showMethod), $this->_getArgs($showMethod));
             $this->_footer();
@@ -178,10 +176,6 @@ class controller{
             return true;
         }
         return false;
-        /*var_dump($this);
-        if (null != $this->_action){
-            $this->runController('zero\\controller');
-        }*/
     }
 }
 
