@@ -48,7 +48,6 @@ class vars implements \ArrayAccess{
         return \array_key_exists($key, $this->_values)?$this->_values[$key]:(\array_key_exists($key, $this->_defaults)?$this->_defaults[$key]:$default);
     }
     public function offsetGet($offset){
-		return $this->get($offset);
-	}
-	
+        return $this->get($offset);
+    }
 }
