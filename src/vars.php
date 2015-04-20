@@ -50,4 +50,5 @@ class vars implements \ArrayAccess{
     public function offsetGet($offset){
 		return $this->get($offset);
 	}
+	
 }
