@@ -46,9 +46,7 @@ class response{
         self::setStatus(200);
     }
     private static function _preventLoop($location){
-        if (request::isGet() && 
-            (isset(request::$server['HTTP_REFERER']) && $location == request::$server['HTTP_REFERER'])) &&
-            $location == request::getUri()){
+        if (request::isGet() && $location === request::getReferer() && $location === request::getUri()){
             self::setStatus(500);
         }
     }
