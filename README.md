@@ -40,7 +40,10 @@ myController extends freestyle\controller{
         $this->rel('relative/path');
         $this->arel(); // construct url path relative to current action
         $this->arel('relative/path');
-        return $this->notFound(); // instead of response::notFound(), this forces exit from all controllers as there was no action method found
+        
+        // instead of response::notFound(), this forces exit from all controllers 
+        // as if there was no action method found:
+        return $this->notFound(); 
     }
     public function showName($name = 'default'){ // /name action
         // $name comes from $_POST or $_GET
