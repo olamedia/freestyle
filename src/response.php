@@ -48,6 +48,7 @@ class response{
     private static function _preventLoop($location){
         if (request::isGet() && $location === request::getReferer() && $location === request::getUri()){
             self::setStatus(500);
+            exit;
         }
     }
     public static function redirect($location, $code = 303){
@@ -56,6 +57,7 @@ class response{
         \session_write_close();
         \header('Location: '.$location, true, $code);
         self::on($code);
+        exit;
     }
     public static function movedPermanently($location){
         self::redirect($location, 301);
