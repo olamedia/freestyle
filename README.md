@@ -41,7 +41,8 @@ myController extends freestyle\controller{
         $this->arel(); // construct url path relative to current action
         $this->arel('relative/path');
         
-        // instead of response::notFound(), this forces exit from all controllers 
+        // instead of response::notFound(), this forces exit from all controllers,
+        // out of application controller, 
         // as if there was no action method found:
         return $this->notFound(); 
     }
