@@ -34,6 +34,14 @@ myController extends freestyle\controller{
         $value = $this->_action;
         $this->runController('valueController', array('value' => $value));
     }
+    public function initSomeAction(){
+        $app = $this->app(); // root controller
+        $this->rel(); // construct url path relative to controller root (index) action
+        $this->rel('relative/path');
+        $this->arel(); // construct url path relative to current action
+        $this->arel('relative/path');
+        return $this->notFound(); // instead of response::notFound(), this forces exit from all controllers as there was no action method found
+    }
     public function showName($name = 'default'){ // /name action
         // $name comes from $_POST or $_GET
         echo 'Hello, '.htmlspecialchars($name).'!';
