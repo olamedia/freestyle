@@ -37,7 +37,7 @@ class controller{
         if (null !== $parent){
             $this->_parents[get_class($parent)] = $parent;
         }
-        $urla = explode('?', $_SERVER['REQUEST_URI']);
+        $urla = explode('?', request::getUri());
         $this->_requestPath = new path($urla[0]);
     }
     public static function run($base = '/', $options = array()){
@@ -55,7 +55,7 @@ class controller{
         return $this->rel($this->_action?$this->_action:'');
     }
     public function url(){
-        return 'http://'.$_SERVER['HTTP_HOST'].$this->_requestPath;
+        return 'http://'.request::getHost().$this->_requestPath;
     }
     public function app(){
         return $this->_app;
