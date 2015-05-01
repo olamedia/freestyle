@@ -17,6 +17,15 @@ class route{
     private $_relativePath = null;
     private $_action = null;
     private $_ext = null;
+    public function __construct($parentRoute = null){
+        if (null === $parentRoute){
+            $urla = explode('?', request::getUri());
+            $this->_requestPath = new path($urla[0]);
+        }else{
+            $this->_requestPath = $parentRoute->getRequestPath();
+            $this->setBasePath($parentRoute->getBasePath());
+        }
+    }
     public function setRequestPath($path){
         $this->_requestPath = new path($path);
         $this->_updateAction();
