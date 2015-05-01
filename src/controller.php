@@ -119,20 +119,15 @@ class controller{
     public function nextSegment(){
         $this->getRoute()->nextSegment();
     }
-    public function route($path){
-        $this->_basePath = new path($path);
-        if (!$this->_requestPath->matchBase($this->_basePath)){
+    public function route(){
+        if (!$this->getRoute()->match()){
             return false; // leave for other apps
         }
         $action = $this->getRoute()->getAction();
-        $a = \explode('.', $this->_action);
-        if (count($a) > 1){
-            $this->_ext = \array_pop($a);
-            $this->_action = \implode('.', $a);
-        }
+        
         $this->preRoute();
         
-        if ($controller = self::getActionController(get_class($this), $this->_action)){
+        if ($controller = self::getActionController(get_class($this), $action)){
             $this->runController($controller);
             if (!$this->_parent){
                 exit;
@@ -142,8 +137,8 @@ class controller{
         $initMethod = 'init';
         $showMethod = 'show';
         $methodFound = false;
-        if (null !== $this->_action){
-            $uc = \ucfirst($this->_action);
+        if (null !== $action){
+            $uc = \ucfirst($action);
             $initMethod = 'init'.$uc;
             $showMethod = 'show'.$uc;
         }
