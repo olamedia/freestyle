@@ -20,15 +20,12 @@ class controller{
     
     protected $_route = null;
     
-    protected $_requestPath = null;
-    protected $_basePath = null;
-    protected $_relativePath = null;
-    protected $_action = null;
-    protected $_ext = '';
-    
     protected $_options = array();
     public function __get($name){
         return isset($this->_options[$name])?$this->_options[$name]:null;
+    }
+    public function getRoute(){
+        return $this->_route;
     }
     public function __construct($parent = null, $options = array()){
         if ($parent){
@@ -40,27 +37,29 @@ class controller{
         $this->_options = $options;
         if (null !== $parent){
             $this->_parents[get_class($parent)] = $parent;
-            $this->_route = new route($parent);
+            $this->_route = new route($parent->getRoute());
         }else{
             $this->_route = new route();
         }
     }
     public static function run($base = '/', $options = array()){
         $c = new static(null, $options);
-        return $c->route($base);
+        $c->getRoute()->setBasePath($base);
+        return $c->route();
     }
     public function runController($controllerClass, $options = array(), $mergeOptions = true){
         $c = new $controllerClass($this, $mergeOptions?\array_merge($this->_options, $options):$options);
-        return $c->route($this->arel());
+        $c->getRoute()->setBasePath($this->arel());
+        return $c->route();
     }
     public function rel($path = ''){
-        return $this->_basePath->rel($path);
+        return $this->getRoute()->rel($path);
     }
     public function arel($path = ''){
-        return $this->rel($this->_action?$this->_action:'');
+        return $this->getRoute()->arel($path);
     }
     public function url(){
-        return 'http://'.request::getHost().$this->_requestPath;
+        return 'http://'.request::getHost().$this->getRoute()->getRequestPath();
     }
     public function app(){
         return $this->_app;
@@ -118,22 +117,14 @@ class controller{
         return $args;
     }
     public function nextSegment(){
-        $this->_basePath = new path($this->arel());
-        $this->_relativePath = $this->_requestPath->sub($this->_basePath);
-        $this->_action = $this->_relativePath->first();
-        $a = \explode('.', $this->_action);
-        if (count($a) > 1){
-            $this->_ext = \array_pop($a);
-            $this->_action = \implode('.', $a);
-        }
+        $this->getRoute()->nextSegment();
     }
     public function route($path){
         $this->_basePath = new path($path);
         if (!$this->_requestPath->matchBase($this->_basePath)){
             return false; // leave for other apps
         }
-        $this->_relativePath = $this->_requestPath->sub($this->_basePath);
-        $this->_action = $this->_relativePath->first();
+        $action = $this->getRoute()->getAction();
         $a = \explode('.', $this->_action);
         if (count($a) > 1){
             $this->_ext = \array_pop($a);
