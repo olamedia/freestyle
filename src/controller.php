@@ -17,9 +17,7 @@ class controller{
     protected $_app = null;
     protected $_parent = null;
     protected $_parents = array();
-    
     protected $_route = null;
-    
     protected $_options = array();
     public function __get($name){
         return isset($this->_options[$name])?$this->_options[$name]:null;
@@ -119,6 +117,9 @@ class controller{
     public function nextSegment(){
         $this->getRoute()->nextSegment();
     }
+    private function _callActionMethod($name){
+        \call_user_func_array(array($this, $name), $this->_getArgs($name));
+    }
     public function route(){
         if (!$this->getRoute()->match()){
             return false; // leave for other apps
@@ -144,20 +145,20 @@ class controller{
         }
         if (\method_exists($this, $initMethod)){
             $methodFound = true;
-            \call_user_func_array(array($this, $initMethod), $this->_getArgs($initMethod));
+            $this->_callActionMethod($initMethod);
         }
         if (\method_exists($this, $showMethod)){
             $methodFound = true;
             \session_write_close();
             $this->_header();
-            \call_user_func_array(array($this, $showMethod), $this->_getArgs($showMethod));
+            $this->_callActionMethod($showMethod);
             $this->_footer();
         }
-        if (!$methodFound){
+        if (!$methodFound && null !== $action){
             $initMethod = 'action';
             if (\method_exists($this, $initMethod)){
                 $methodFound = true;
-                \call_user_func_array(array($this, $initMethod), $this->_getArgs($initMethod));
+                $this->_callActionMethod($initMethod);
             }
         }
         if ($this->_forceNotFound){
