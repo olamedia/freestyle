@@ -11,6 +11,10 @@
  
 namespace freestyle;
 
+/**
+ * Route holds the request processing state. 
+ * The request path, base path and current action (segment) to process.
+ */
 class route{
     private $_requestPath = null;
     private $_basePath = null;
