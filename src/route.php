@@ -19,9 +19,11 @@ class route{
     private $_ext = null;
     public function setRequestPath($path){
         $this->_requestPath = new path($path);
+        $this->_updateAction();
     }
     public function setBasePath($path){
         $this->_basePath = new path($path);
+        $this->_updateAction();
     }
     public function setRelativePath($path){
         $this->_relativePath = new path($path);
@@ -46,6 +48,25 @@ class route{
     }
     public function arel($path = ''){
         return $this->rel($this->_action?$this->_action:'')->rel($path);
+    }
+    private function _updateAction(){
+        if (null === $this->_relativePath || null === $this->_basePath){
+            return;
+        }
+        $this->_relativePath = $this->_requestPath->sub($this->_basePath);
+		$this->_action = $this->_relativePath->first();
+        $a = \explode('.', $this->_action);
+        if (count($a) > 1){
+            $this->_ext = \array_pop($a);
+            $this->_action = \implode('.', $a);
+        }
+    }
+    public function rewrite($requestPath, $basePath){
+		$this->_requestPath = new path($requestPath);
+		$this->setBasePath($basePath);
+    }
+    public function nextSegment(){
+        $this->setBasePath($this->arel());
     }
 }
 
