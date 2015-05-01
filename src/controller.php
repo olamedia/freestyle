@@ -17,11 +17,15 @@ class controller{
     protected $_app = null;
     protected $_parent = null;
     protected $_parents = array();
+    
+    protected $_route = null;
+    
     protected $_requestPath = null;
     protected $_basePath = null;
     protected $_relativePath = null;
     protected $_action = null;
     protected $_ext = '';
+    
     protected $_options = array();
     public function __get($name){
         return isset($this->_options[$name])?$this->_options[$name]:null;
@@ -36,9 +40,10 @@ class controller{
         $this->_options = $options;
         if (null !== $parent){
             $this->_parents[get_class($parent)] = $parent;
+            $this->_route = new route($parent);
+        }else{
+            $this->_route = new route();
         }
-        $urla = explode('?', request::getUri());
-        $this->_requestPath = new path($urla[0]);
     }
     public static function run($base = '/', $options = array()){
         $c = new static(null, $options);
