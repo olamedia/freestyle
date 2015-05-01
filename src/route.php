@@ -41,5 +41,11 @@ class route{
     public fucntion getAction(){
         return $this->_action;
     }
+    public function rel($path = ''){
+        return $this->_basePath->rel($path);
+    }
+    public function arel($path = ''){
+        return $this->rel($this->_action?$this->_action:'')->rel($path);
+    }
 }
 
