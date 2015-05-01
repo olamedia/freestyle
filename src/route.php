@@ -58,8 +58,14 @@ class route{
     public function arel($path = ''){
         return $this->rel($this->_action?$this->_action:'')->rel($path);
     }
+    public function match(){
+        return $this->_requestPath->matchBase($this->_basePath);
+    }
     private function _updateAction(){
         if (null === $this->_relativePath || null === $this->_basePath){
+            return;
+        }
+        if (!$this->match()){
             return;
         }
         $this->_relativePath = $this->_requestPath->sub($this->_basePath);
