@@ -39,7 +39,8 @@ class response{
         }
     }
     public static function setStatus($code){
-        \header('Status: '.$code.(isset(self::$_statusMessages[$code])?self::$_statusMessages[$code]:''));
+        \http_response_code($code);
+        //\header('Status: '.$code.(isset(self::$_statusMessages[$code])?self::$_statusMessages[$code]:''));
         self::on($code);
     }
     public static function ok(){
