@@ -108,12 +108,12 @@ class controller{
         $args = array();
         foreach ($parameters as $p){
             $name = $p->getName();
-            if (isset($predefinedArgs[$name])){
-                $value = $predefinedArgs[$name];
+            if (isset($_POST[$name])){
+                $value = $_POST[$name];
             }elseif (isset($_GET[$name])){
                 $value = $_GET[$name];
-            }elseif (isset($_POST[$name])){
-                $value = $_POST[$name];
+            }elseif (isset($predefinedArgs[$name])){
+                $value = $predefinedArgs[$name];
             }else{
                 $value = $p->isDefaultValueAvailable()?$p->getDefaultValue():null;
             }
