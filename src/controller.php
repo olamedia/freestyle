@@ -47,6 +47,7 @@ class controller{
     }
     public function runController($controllerClass, $options = array(), $mergeOptions = true){
         $c = new $controllerClass($this, $mergeOptions?\array_merge($this->_options, $options):$options);
+        $this->_found = true;
         $c->getRoute()->setBasePath($this->arel());
         return $c->route();
     }
@@ -133,11 +134,7 @@ class controller{
         $action = $this->getRoute()->getAction();
         $this->preRoute();
         if ($controller = self::getActionController(get_class($this), $action)){
-            $this->runController($controller);
-            if (!$this->_parent){
-                exit;
-            }
-            return true;
+            return $this->runController($controller);
         }
         $initMethod = 'init';
         $showMethod = 'show';
