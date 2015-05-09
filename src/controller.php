@@ -85,9 +85,15 @@ class controller{
     public static function setActionController($parent, $action, $class){
         // TODO
     }
-    private $_forceNotFound = false;
+    private $_found = false;
+    public function found($methodName = null){
+        if (\method_exists($this, $methodName)){
+            $this->_found = true;
+            \call_user_func_array(array($this, $methodName), $this->_getArgs($methodName));
+        }
+    }
     public function notFound(){
-        $this->_forceNotFound = true;
+        $this->_found = false;
         if ($this->_parent){
             $this->_parent->notFound();
         }
@@ -117,17 +123,15 @@ class controller{
     public function nextSegment(){
         $this->getRoute()->nextSegment();
     }
-    private function _callActionMethod($name){
-        \call_user_func_array(array($this, $name), $this->_getArgs($name));
+    private function _exists($methodName){
+        return \method_exists($this, $methodName);
     }
     public function route(){
         if (!$this->getRoute()->match()){
             return false; // leave for other apps
         }
         $action = $this->getRoute()->getAction();
-        
         $this->preRoute();
-        
         if ($controller = self::getActionController(get_class($this), $action)){
             $this->runController($controller);
             if (!$this->_parent){
@@ -137,40 +141,27 @@ class controller{
         }
         $initMethod = 'init';
         $showMethod = 'show';
-        $methodFound = false;
         if (null !== $action){
             $uc = \ucfirst($action);
             $initMethod = 'init'.$uc;
             $showMethod = 'show'.$uc;
         }
-        if (\method_exists($this, $initMethod)){
-            $methodFound = true;
-            $this->_callActionMethod($initMethod);
-        }
-        if (\method_exists($this, $showMethod)){
-            $methodFound = true;
-            \session_write_close();
-            $this->_header();
-            $this->_callActionMethod($showMethod);
-            $this->_footer();
-        }
-        if (!$methodFound && null !== $action){
-            $initMethod = 'action';
-            if (\method_exists($this, $initMethod)){
-                $methodFound = true;
-                $this->_callActionMethod($initMethod);
+        if ($this->_exists($initMethod) || $this->_exists($showMethod)){
+            $this->found($initMethod);
+            if ($this->_exists($showMethod)){
+                \session_write_close();
+                $this->_header();
+                $this->found($showMethod);
+                $this->_footer();
             }
+        }elseif (null !== $action){
+            $this->found('action');
         }
-        if ($this->_forceNotFound){
-            $methodFound = false;
-        }
-        if ($methodFound){
+        if ($this->_found){
             if (!$this->_parent){
                 exit;
             }
-            return true;
         }
-        return false;
     }
 }
 
