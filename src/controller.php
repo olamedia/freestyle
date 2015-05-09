@@ -19,12 +19,6 @@ class controller{
     protected $_parents = array();
     protected $_route = null;
     protected $_options = array();
-    public function __get($name){
-        return isset($this->_options[$name])?$this->_options[$name]:null;
-    }
-    public function getRoute(){
-        return $this->_route;
-    }
     public function __construct($parent = null, $options = array()){
         if ($parent){
             $this->_app = $parent->app();
@@ -40,16 +34,14 @@ class controller{
             $this->_route = new route();
         }
     }
-    public static function run($base = '/', $options = array()){
-        $c = new static(null, $options);
-        $c->getRoute()->setBasePath($base);
-        return $c->route();
+    public function getRoute(){
+        return $this->_route;
     }
-    public function runController($controllerClass, $options = array(), $mergeOptions = true){
-        $c = new $controllerClass($this, $mergeOptions?\array_merge($this->_options, $options):$options);
-        $this->_found = true;
-        $c->getRoute()->setBasePath($this->arel());
-        return $c->route();
+    public function nextSegment(){
+        $this->getRoute()->nextSegment();
+    }
+    public function app(){
+        return $this->_app;
     }
     public function rel($path = ''){
         return $this->getRoute()->rel($path);
@@ -60,11 +52,7 @@ class controller{
     public function url(){
         return 'http://'.request::getHost().$this->getRoute()->getRequestPath();
     }
-    public function app(){
-        return $this->_app;
-    }
     protected function _header(){
-        //response::sendHeaders();
         if ($this->_parent){
             $this->_parent->_header();
         }
@@ -121,11 +109,19 @@ class controller{
         }
         return $args;
     }
-    public function nextSegment(){
-        $this->getRoute()->nextSegment();
-    }
     private function _exists($methodName){
         return \method_exists($this, $methodName);
+    }
+    public static function run($base = '/', $options = array()){
+        $c = new static(null, $options);
+        $c->getRoute()->setBasePath($base);
+        return $c->route();
+    }
+    public function runController($controllerClass, $options = array(), $mergeOptions = true){
+        $c = new $controllerClass($this, $mergeOptions?\array_merge($this->_options, $options):$options);
+        $this->_found = true;
+        $c->getRoute()->setBasePath($this->arel());
+        return $c->route();
     }
     public function route(){
         if (!$this->getRoute()->match()){
@@ -159,6 +155,9 @@ class controller{
                 exit;
             }
         }
+    }
+    public function __get($name){
+        return isset($this->_options[$name])?$this->_options[$name]:null;
     }
 }
 
