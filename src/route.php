@@ -39,9 +39,9 @@ class route{
         $this->_basePath = new path($path);
         $this->_updateAction();
     }
-    public function setRelativePath($path){
+    /*public function setRelativePath($path){
         $this->_relativePath = new path($path);
-    }
+    }*/
     public function setAction($action){
         $this->_action = $action;
     }
@@ -79,6 +79,7 @@ class route{
         if (!$this->match()){
             return;
         }
+        $this->_canonical = null;
         $this->_relativePath = $this->_requestPath->sub($this->_basePath);
 		$this->_action = $this->_relativePath->first();
         $a = \explode('.', $this->_action);
