@@ -21,6 +21,7 @@ class route{
     private $_relativePath = null;
     private $_action = null;
     private $_ext = null;
+    private $_canonical = null;
     public function __construct($parentRoute = null){
         if (null === $parentRoute){
             $urla = explode('?', request::getUri());
@@ -44,17 +45,23 @@ class route{
     public function setAction($action){
         $this->_action = $action;
     }
-    public fucntion getRequestPath(){
+    public function setCanonical($path){
+        $this->_canonical = $path;
+    }
+    public function getRequestPath(){
         return $this->_requestPath;
     }
-    public fucntion getBasePath(){
+    public function getBasePath(){
         return $this->_basePath;
     }
-    public fucntion getRelativePath(){
+    public function getRelativePath(){
         return $this->_relativePath;
     }
-    public fucntion getAction(){
+    public function getAction(){
         return $this->_action;
+    }
+    public function getCanonical(){
+        return $this->_canonical;
     }
     public function rel($path = ''){
         return $this->_basePath->rel($path);
