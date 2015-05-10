@@ -79,7 +79,9 @@ class controller{
         if (\method_exists($this, $methodName)){
             $this->_found = true;
             \call_user_func_array(array($this, $methodName), $this->_getArgs($methodName));
+            return true;
         }
+        return false;
     }
     public function notFound(){
         $this->_found = false;
@@ -123,6 +125,17 @@ class controller{
         $c->getRoute()->setBasePath($this->arel());
         return $c->route();
     }
+    private function _updateCanonical($methodName, $prefix){
+        $o = new \ReflectionObject($this);
+        try{
+            $m = $o->getMethod($methodName);
+            if ($m){
+                $action = preg_replace('#^'.$prefix.'#is', '', $m->name);
+                $this->getRoute()->setCanonical($this->rel($action));
+            }
+        }catch(\Exception $e){
+        }
+    }
     public function route(){
         if (!$this->getRoute()->match()){
             return false; // leave for other apps
@@ -140,7 +153,15 @@ class controller{
             $showMethod = 'show'.$uc;
         }
         if ($this->_exists($initMethod) || $this->_exists($showMethod)){
-            $this->found($initMethod);
+            if ($this->_exists($initMethod)){
+                $this->_updateCanonical($initMethod, 'init');
+            }
+            if ($this->_exists($showMethod)){
+                $this->_updateCanonical($showMethod, 'show');
+            }
+            if ($this->_exists($initMethod)){
+                $this->found($initMethod)
+            }
             if ($this->_exists($showMethod)){
                 \session_write_close();
                 $this->_header();
