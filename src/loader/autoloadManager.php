@@ -24,6 +24,8 @@ namespace freestyle;
  */
 class autoloadManager{
 	protected static $_instance = null;
+	protected $_modulesLoaders = array();
+	protected $_moduleLoaders = array();
 	protected $_namespaceLoaders = array();
 	protected $_cacheLoaders = array();
 	protected $_cache = array();
@@ -44,6 +46,12 @@ class autoloadManager{
 			}
 		}
 	}
+	public function registerModulesLoader($loader){
+		$this->_modulesLoaders[] = $loader;
+	}
+	public function registerModuleLoader($loader){
+		$this->_moduleLoaders[] = $loader;
+	}
 	public function registerClassLoader($loader){
 		$this->_classLoaders[] = $loader;
 	}
@@ -57,6 +65,16 @@ class autoloadManager{
 		$this->_namespaceLoaders[] = $loader;
 	}
 	public function autoload($class){
+		foreach ($this->_modulesLoaders as $loader){
+			if (\call_user_func($loader, $class)){
+				break;
+			}
+		}
+		foreach ($this->_moduleLoaders as $loader){
+			if (\call_user_func($loader, $class)){
+				break;
+			}
+		}
 		foreach ($this->_namespaceLoaders as $loader){
 			if (\call_user_func($loader, $class)){
 				break;
