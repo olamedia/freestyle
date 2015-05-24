@@ -15,7 +15,7 @@ namespace freestyle;
 /**
  * modulesLoader
  * Modules class map autoloader
- * ::create(__DIR__.'/modules')
+ * ::create(__DIR__.'/modules', 'my application')
  *
  * @package freestyle
  * @subpackage loader
@@ -24,17 +24,37 @@ namespace freestyle;
  */
 class modulesLoader{
 	protected $_path = null;
+	protected $_namespace = null;
 	protected $_options = array(
 			'bootstrap' => 'module.php',
 		);
+	protected $_modulesPreloaded = false;
 	protected $_modulesLoaded = false;
 	protected static $_modules = array();
-	public static function create($path){
+	public static function __construct($path, $namespace = null){
 		$this->_path = $path;
+		 = $namespace;
 		autoloadManager::getInstance()->registerModulesLoader(array($this, 'preloadModules'));
 		autoloadManager::getInstance()->registerModuleLoader(array($this, 'loadModules'));
 	}
+	public static function create(){
+		$args = \func_get_args();
+		$class = new \ReflectionClass(\get_called_class());
+		$constructor = $class->getConstructor();
+		if ($constructor->isPublic()){
+			$instance = $class->newInstanceArgs($args);
+		}else{
+			$constructor->setAccessible(true);
+			$instance = $class->newInstanceWithoutConstructor();
+			$constructor->invokeArgs($instance, $args);
+		}
+		return $instance;
+	}	
 	public function loadModules(){
+		if ($this->_modulesLoaded){
+			return;
+		}
+		$this->_modulesLoaded = true;
 		foreach (self::$_modules as $name => $f){
 			$autoload = array();
 			$map = include $f; // FIXME do automatic check for invalid code
@@ -47,7 +67,10 @@ class modulesLoader{
 		}
 	}
 	public function preloadModules(){
-		//$this->_modulesLoaded = true;
+		if ($this->_modulesPreloaded){
+			return;
+		}
+		$this->_modulesPreloaded = true;
         foreach (\glob($this->_path.\DIRECTORY_SEPARATOR.'*') as $d){
             if (\is_dir($d)){
                 $base = basename($d);
@@ -57,7 +80,7 @@ class modulesLoader{
                 }
 				$f = $d.\DIRECTORY_SEPARATOR.$this->_options['bootstrap'];
                 if (\is_file($f)){
-					self::$_modules[$base] = $f;
+					self::$_modules[(null===$this->_namespace?'\\':$this->_namespace.'\\').$base] = $f;
                 }
             }
         }
