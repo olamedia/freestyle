@@ -13,6 +13,7 @@
 namespace freestyle;
 
 class link{
+	private static $_instances = [];
 	private static $_ai = 0;
 	private $_id = 0;
 	private $_keyMap = null;
@@ -22,6 +23,13 @@ class link{
 	}
 	public function getId(){
 		return $this->_id;
+	}
+	public function setName($name){
+		self::$_instances[$name] = $this;
+		return $this;
+	}
+	public static function getInstance($name){
+		return self::$_instances[$name];
 	}
 	public function getStorage($tableName){
 		return modelStorage::create($this, $tableName);

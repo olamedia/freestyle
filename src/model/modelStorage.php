@@ -12,7 +12,25 @@
  
 namespace freestyle;
 
-class modelStorage{
+class modelStorage implements \ArrayAccess, \IteratorAggregate, \Countable{
+	public function offsetGet($fieldName){
+		return new field($this, $fieldName);
+	}
+	public function offsetSet($fieldName, $value){
+		// TODO?? default value?
+    }
+    public function offsetExists($fieldName){
+		// TODO?? list columns?
+    }
+    public function offsetUnset($fieldName){
+		// TODO?? drop column?
+    }
+	public function getIterator(){
+        return $this->select()->getIterator();
+    }
+	public function count(){
+		return count($this->select()->getIterator());
+	}
 	private static $_registry = [];
 	public function register($className){
 		self::$_registry[$className] = $this;
@@ -53,10 +71,21 @@ class modelStorage{
 	public function getKeyMap(){
 		return $this->_keyMap;
 	}
+	/*public function q($sql){
+		return $this->_link->q($sql);
+	}*/
 	public function insert($model){
 		$this->_link->insert($this, $model);
 	}
 	public function update($model){
 		$this->_link->update($this, $model);
+	}
+	
+	public function select($what = null){
+		$q = new query($this);
+		if (null !== $what){
+			$q->select($what);
+		}
+		return $q;
 	}
 }

@@ -68,6 +68,13 @@ class model implements \ArrayAccess, \IteratorAggregate{
 			$this->insert();
 		}
 	}
+	/*public static function q($sql){
+		$storage = modelStorage::get(\get__called_class());
+		return $storage->q($sql);
+	}*/
+	public static function all(){
+		return modelStorage::get(\get_called_class());
+	}
 	
 	
 	

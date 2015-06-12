@@ -17,6 +17,7 @@ class pgLink extends link{
 	protected $_connectionString;
 	protected $_connectType;
 	protected $_link = null;
+	// http://php.net/manual/en/function.pg-connect.php
 	public function __construct($connection_string, $connect_type = 0){
 		parent::__construct();
 		$this->_connectionString = $connection_string;
@@ -102,5 +103,130 @@ class pgLink extends link{
 		}
 		$q = \pg_execute($this->getLink(), $stKey, $values);
 		$this->_setModelSaved($model);
+	}
+	private static $_opa = [
+		1 => '=',
+		2 => '!=',
+		3 => '<',
+		4 => '<=',
+		5 => '>',
+		6 => '>=',
+		7 => 'AND',
+		8 => 'OR',
+	];
+	private function _value($v, &$n, &$values){
+		$sql = '';
+		if ($v instanceof field){
+			$sql .= $v->getName();
+		}else{
+			$sql .= '$'.(++$n);
+			$values[] = $v;
+		}
+		return $sql;
+	}
+	private function _condition($c, &$n, &$values){
+		$sql = '';
+		$l = $c->getLeft();
+		$op = $c->getOp();
+		$r = $c->getRight();
+		$lv = null;
+		if ($l instanceof condition){
+			$sql .= $this->_condition($l, $n, $values); 
+		}else{
+			$sql .= $this->_value($l, $n, $values); 
+		}
+		$sql .= ' '.self::$_opa[$op].' ';
+		if ($r instanceof condition){
+			$sql .= $this->_condition($r, $n, $values); 
+		}else{
+			$sql .= $this->_value($r, $n, $values); 
+		}
+		return $sql;
+	}
+	private function _order($o, &$n, &$values){
+		$sql = '';
+		list($v, $d) = $o;
+		if ($v instanceof condition){
+			$sql .= $this->_condition($v, $n, $values); 
+		}else{
+			$sql .= $this->_value($v, $n, $values); 
+		}
+		if (query::asc === $d){
+			$sql .= ' ASC';
+		}else{
+			$sql .= ' DESC';
+		}
+		return $sql;
+	}
+	public function select($query){
+		return new result($query);
+	}
+	public function fetch($result){
+		return \pg_fetch_assoc($result);
+	}
+	public function query($query){
+		$values = [];
+		$sql = $this->_getSql($query, $values);
+		$stKey = $sql;
+		if (!isset(self::$_prepared[$stKey])){
+			\pg_prepare($this->getLink(), $stKey, $sql);
+		}
+		$q = \pg_execute($this->getLink(), $stKey, $values);
+		return $q;
+	}
+	public function queryCount($query){
+		$values = [];
+		$sql = $this->_getSql($query, $values, true);
+		$stKey = $sql;
+		if (!isset(self::$_prepared[$stKey])){
+			\pg_prepare($this->getLink(), $stKey, $sql);
+		}
+		$q = \pg_execute($this->getLink(), $stKey, $values);
+		$r = \pg_fetch_assoc($q);
+		return \reset($r);
+	}
+	public function getSql($query){
+		$values = [];
+		return $this->_getSql($query, $values);
+	}
+	private function _getSql($query, &$values, $count = false){
+		$storage = $query->getStorage();
+		$tableName = $storage->getTableName();
+		$sa = $query->getWhat();
+		$n = 0;
+		$values = [];
+		$sql = 'SELECT ';
+		if ($count){
+			$sql .= 'COUNT(*)';
+		}else{
+			if (!count($sa)){
+				$sql .= '*';
+			}else{
+				//$sql .= implode(',', );
+			}
+		}
+		$sql .= ' FROM '.$tableName;
+		$wa = $query->getWhere();
+		if (count($wa)){
+			$sql .= ' WHERE ';
+			$sqla = [];
+			foreach ($wa as $c){
+				$sqla[] = $this->_condition($c, $n, $values);
+			}
+			$sql .= \implode(' AND ', $sqla);
+		}
+		if (!$count){
+			$oa = $query->getOrder();
+			if (count($oa)){
+				$sql .= ' ORDER BY ';
+				$sqla = [];
+				foreach ($oa as $o){
+					$sqla[] = $this->_order($o, $n, $values);
+				}
+				$sql .= \implode(', ', $sqla);
+			}
+		}
+//		var_dump($sql, $values);
+		return $sql;
 	}
 }
