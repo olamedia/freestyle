@@ -22,4 +22,5 @@ $autoload = [
 	'freestyle\\reflection' => 'reflection.php',
 	'freestyle\\link' => 'link.php',
 	'freestyle\\pgLink' => 'drivers/pgLink.php',
+	'freestyle\\mysqlPdoLink' => 'drivers/mysqlPdoLink.php',
 ];
