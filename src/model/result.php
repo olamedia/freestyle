@@ -21,7 +21,15 @@ class result implements \IteratorAggregate, \Countable{
 	public function toArray(){
 		
 	}
+	public function free(){
+		$storage = $this->_query->getStorage();
+		$link = $storage->getLink();
+		if (null !== $this->_result){
+			$link->free($this->_result);
+		}
+	}
 	public function reset(){
+		$this->free();
 		$storage = $this->_query->getStorage();
 		$link = $storage->getLink();
 		$this->_result = $link->query($this->_query);
@@ -29,7 +37,13 @@ class result implements \IteratorAggregate, \Countable{
 	public function fetch(){
 		$storage = $this->_query->getStorage();
 		$link = $storage->getLink();
-		return $link->fetch($this->_result);
+		$a = $link->fetch($this->_result);
+		if (!\is_array($a)){
+			return null;
+		}
+		$cn = $this->_query->getClassName();
+		$a = new $cn($a, true);
+		return $a;
 	}
 	public function getIterator(){
         return new resultIterator($this);

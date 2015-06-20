@@ -12,14 +12,23 @@
  
 $autoload = [
 	'freestyle\\model' => 'model.php',
+	
+	'freestyle\\property' => 'property.php',
+	'freestyle\\stringProperty' => 'properties/stringProperty.php',
+	
 	'freestyle\\keyMap' => 'keyMap.php',
+	'freestyle\\propertyMap' => 'propertyMap.php',
+	
 	'freestyle\\modelStorage' => 'modelStorage.php',
 	'freestyle\\field' => 'field.php',
 	'freestyle\\condition' => 'condition.php',
+	
 	'freestyle\\query' => 'query.php',
 	'freestyle\\result' => 'result.php',
 	'freestyle\\resultIterator' => 'resultIterator.php',
+	
 	'freestyle\\reflection' => 'reflection.php',
+	
 	'freestyle\\link' => 'link.php',
 	'freestyle\\pgLink' => 'drivers/pgLink.php',
 	'freestyle\\mysqlPdoLink' => 'drivers/mysqlPdoLink.php',

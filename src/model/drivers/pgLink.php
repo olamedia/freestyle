@@ -164,9 +164,19 @@ class pgLink extends link{
 	public function fetch($result){
 		return \pg_fetch_assoc($result);
 	}
+	public function delete($query){
+		$values = [];
+		$sql = $this->_getSql($query, $values, false, true);
+		$stKey = $sql;
+		if (!isset(self::$_prepared[$stKey])){
+			\pg_prepare($this->getLink(), $stKey, $sql);
+		}
+		$q = \pg_execute($this->getLink(), $stKey, $values);
+		return $q;
+	}
 	public function query($query){
 		$values = [];
-		$sql = $this->_getSql($query, $values);
+		$sql = $this->_getSql($query, $values, false);
 		$stKey = $sql;
 		if (!isset(self::$_prepared[$stKey])){
 			\pg_prepare($this->getLink(), $stKey, $sql);
@@ -189,20 +199,22 @@ class pgLink extends link{
 		$values = [];
 		return $this->_getSql($query, $values);
 	}
-	private function _getSql($query, &$values, $count = false){
+	private function _getSql($query, &$values, $count = false, $delete = false){
 		$storage = $query->getStorage();
 		$tableName = $storage->getTableName();
 		$sa = $query->getWhat();
 		$n = 0;
 		$values = [];
-		$sql = 'SELECT ';
-		if ($count){
-			$sql .= 'COUNT(*)';
-		}else{
-			if (!count($sa)){
-				$sql .= '*';
+		$sql = $delete?'DELETE':'SELECT ';
+		if (!$delete){
+			if ($count){
+				$sql .= 'COUNT(*)';
 			}else{
-				//$sql .= implode(',', );
+				if (!count($sa)){
+					$sql .= '*';
+				}else{
+					//$sql .= implode(',', );
+				}
 			}
 		}
 		$sql .= ' FROM '.$tableName;

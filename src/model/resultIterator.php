@@ -39,6 +39,6 @@ class resultIterator implements \Iterator{
 		return $this->_fetch();
 	}
 	public function valid(){
-		return ($this->current() !== false);
+		return ($this->current() !== false) && ($this->current() !== null);
 	}
 }

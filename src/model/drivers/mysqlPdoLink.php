@@ -168,9 +168,19 @@ class mysqlPdoLink extends link{
 	public function fetch($result){
 		return $result->fetch(\PDO::FETCH_ASSOC);
 	}
+	public function delete($query){
+		$values = [];
+		$sql = $this->_getSql($query, $values, false, true);
+		$stKey = $sql;
+		$stmt = $this->getLink()->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]);
+		if ($stmt->execute($values)){
+			return $stmt;
+		}
+		return null;
+	}
 	public function query($query){
 		$values = [];
-		$sql = $this->_getSql($query, $values);
+		$sql = $this->_getSql($query, $values, false);
 		$stKey = $sql;
 		$stmt = $this->getLink()->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]);
 		if ($stmt->execute($values)){
@@ -194,20 +204,22 @@ class mysqlPdoLink extends link{
 		$values = [];
 		return $this->_getSql($query, $values);
 	}
-	private function _getSql($query, &$values, $count = false){
+	private function _getSql($query, &$values, $count = false, $delete = false){
 		$storage = $query->getStorage();
 		$tableName = $storage->getTableName();
 		$sa = $query->getWhat();
 		$n = 0;
 		$values = [];
-		$sql = 'SELECT ';
-		if ($count){
-			$sql .= 'COUNT(*)';
-		}else{
-			if (!count($sa)){
-				$sql .= '*';
+		$sql = $delete?'DELETE':'SELECT ';
+		if (!$delete){
+			if ($count){
+				$sql .= 'COUNT(*)';
 			}else{
-				//$sql .= implode(',', );
+				if (!count($sa)){
+					$sql .= '*';
+				}else{
+					//$sql .= implode(',', );
+				}
 			}
 		}
 		$sql .= ' FROM '.$tableName;

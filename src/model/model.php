@@ -18,6 +18,22 @@ class model implements \ArrayAccess, \IteratorAggregate{
 		$this->_fromDb = $fromDb;
 		$this->_isDraft = !$fromDb;
 	}
+	public function __get($name){
+		$storage = modelStorage::get(\get_called_class());
+		$map = $storage->getPropertyMap();
+		$field = $map->getField($name);
+		if (null === $field){
+			$field = $name;
+		}
+		$class = $map->getClass($name);
+		if (null === $class){
+			$class = __NAMESPACE__.'\\property';
+		}
+		return new $class($this, $name, $field);
+	}
+	public function __set($name, $value){
+		$this->__get($name)->setValue($value);
+	}
 	public function offsetSet($offset, $value){
         if (null === $offset){
             $this->_data[] = $value;

@@ -34,10 +34,11 @@ class link{
 	public function getStorage($tableName){
 		return modelStorage::create($this, $tableName);
 	}
-	public function register($className, $tableName = null, $keyMap = []){
+	public function register($className, $tableName = null, $keyMap = [], $propertyMap = []){
 		$this->getStorage($tableName)
 			->register($className)
 			->setKeyMap($keyMap)
+			->setPropertyMap($propertyMap)
 			;
 		//storageManager::getInstance()[$className] = $storage;
 		return $this;

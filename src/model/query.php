@@ -22,11 +22,16 @@ class query implements \IteratorAggregate, \Countable{
 		return count($this->getResult());
 	}
 	private $_storage = null;
+	private $_className = null;
 	private $_what = [];
 	private $_where = [];
 	private $_order = [];
-	public function __construct($storage){
+	public function __construct($storage, $className){
 		$this->_storage = $storage;
+		$this->_className = $className;
+	}
+	public function getClassName(){
+		return $this->_className;
 	}
 	public function getStorage(){
 		return $this->_storage;
@@ -62,6 +67,9 @@ class query implements \IteratorAggregate, \Countable{
 	}
 	public function getOrder(){
 		return $this->_order;
+	}
+	public function delete(){
+		return $this->_storage->getLink()->delete($this);
 	}
 	public function getResult(){
 		return $this->_storage->getLink()->select($this);

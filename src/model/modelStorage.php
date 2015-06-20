@@ -33,6 +33,7 @@ class modelStorage implements \ArrayAccess, \IteratorAggregate, \Countable{
 	}
 	private static $_registry = [];
 	public function register($className){
+		$this->_className = $className;
 		self::$_registry[$className] = $this;
 		return $this;
 	}
@@ -41,14 +42,18 @@ class modelStorage implements \ArrayAccess, \IteratorAggregate, \Countable{
 	}
 	protected $_link = null;
 	protected $_tableName = null;
+	protected $_className = null;
 	protected $_keyMap = null;
-	public function __construct($link, $tableName = null){
+	protected $_propertyMap = null;
+	public function __construct($link, $tableName = null, $className = null){
 		$this->_link = $link;
 		$this->_tableName = $tableName;
+		$this->_className = $className;
 		$this->_keyMap = new keyMap();
+		$this->_propertyMap = new propertyMap();
 	}
-	public static function create($link, $tableName = null){
-		return new self($link, $tableName);
+	public static function create($link, $tableName = null, $className = null){
+		return new self($link, $tableName, $className);
 	}
 	public function setLink($link){
 		$this->_link = $link;
@@ -71,6 +76,13 @@ class modelStorage implements \ArrayAccess, \IteratorAggregate, \Countable{
 	public function getKeyMap(){
 		return $this->_keyMap;
 	}
+	public function setPropertyMap($propertyMap){
+		$this->_propertyMap->set($propertyMap);
+		return $this;
+	}
+	public function getPropertyMap(){
+		return $this->_propertyMap;
+	}
 	/*public function q($sql){
 		return $this->_link->q($sql);
 	}*/
@@ -80,9 +92,12 @@ class modelStorage implements \ArrayAccess, \IteratorAggregate, \Countable{
 	public function update($model){
 		$this->_link->update($this, $model);
 	}
+	public function delete(){
+		$this->select()->delete();
+	}
 	
 	public function select($what = null){
-		$q = new query($this);
+		$q = new query($this, $this->_className);
 		if (null !== $what){
 			$q->select($what);
 		}
