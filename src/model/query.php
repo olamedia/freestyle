@@ -69,7 +69,7 @@ class query implements \IteratorAggregate, \Countable{
 		return $this->_order;
 	}
 	public function delete(){
-		return $this->_storage->getLink()->delete($this);
+		return $this->_storage->getLink()->queryDelete($this);
 	}
 	public function getResult(){
 		return $this->_storage->getLink()->select($this);

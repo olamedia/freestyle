@@ -70,11 +70,15 @@ class pgLink extends link{
 			\pg_prepare($this->getLink(), $stKey, $sql);
 		}
 		$q = \pg_execute($this->getLink(), $stKey, $values);
-		$aa = \pg_fetch_assoc($q);
-		foreach ($aa as $k => $v){
-			$model[$k] = $v;
+		if ($q){
+			$aa = \pg_fetch_assoc($q);
+			foreach ($aa as $k => $v){
+				$model[$k] = $v;
+			}
+			$this->_setModelSaved($model);
+			return true;
 		}
-		$this->_setModelSaved($model);
+		return false;
 	}
 	public function update($storage, $model){
 		$a = $model->toArray();
@@ -102,7 +106,37 @@ class pgLink extends link{
 			\pg_prepare($this->getLink(), $stKey, $sql);
 		}
 		$q = \pg_execute($this->getLink(), $stKey, $values);
-		$this->_setModelSaved($model);
+		if ($q){
+			$this->_setModelSaved($model);
+			return true;
+		}
+		return false;
+	}
+	public function delete($storage, $model){
+		$a = $model->toArray();
+		$tableName = $storage->getTableName();
+		$keyMap = $storage->getKeyMap();
+		$pka = $keyMap->getPrimary();
+		//$changedKeys = reflection::invokeArgs('freestyle\\model', '_getChangedKeys', $model, []);
+		$stKey = 'delete/'.$tableName.'/'.\implode(',', $pka);
+		$n = 0;
+		$values = [];
+		$sql = 'DELETE FROM '.$tableName.'';
+		$wa = [];
+		foreach ($pka as $k){
+			$wa[] = $k.' = $'.(++$n);
+			$values[] = $a[$k];
+		}
+		$sql .= ' WHERE '.\implode(' AND ', $wa);
+		if (!isset(self::$_prepared[$stKey])){
+			\pg_prepare($this->getLink(), $stKey, $sql);
+		}
+		$q = \pg_execute($this->getLink(), $stKey, $values);
+		if ($q){
+			$this->_setModelSaved($model);
+			return true;
+		}
+		return false;
 	}
 	private static $_opa = [
 		1 => '=',
@@ -164,7 +198,7 @@ class pgLink extends link{
 	public function fetch($result){
 		return \pg_fetch_assoc($result);
 	}
-	public function delete($query){
+	public function queryDelete($query){
 		$values = [];
 		$sql = $this->_getSql($query, $values, false, true);
 		$stKey = $sql;

@@ -79,7 +79,9 @@ class mysqlPdoLink extends link{
 				$model[$inc] = $this->_link->lastInsertId();
 			}
 			$this->_setModelSaved($model);
+			return true;
 		}
+		return false;
 	}
 	public function update($storage, $model){
 		$a = $model->toArray();
@@ -106,7 +108,32 @@ class mysqlPdoLink extends link{
 		$stmt = $this->getLink()->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]);
 		if ($stmt->execute($values)){
 			$this->_setModelSaved($model);
+			return true;
 		}
+		return false;
+	}
+	public function delete($storage, $model){
+		$a = $model->toArray();
+		$tableName = $storage->getTableName();
+		$keyMap = $storage->getKeyMap();
+		$pka = $keyMap->getPrimary();
+		//$changedKeys = reflection::invokeArgs('freestyle\\model', '_getChangedKeys', $model, []);
+		$stKey = 'delete/'.$tableName.'/'.\implode(',', $pka);
+		$n = 0;
+		$values = [];
+		$sql = 'DELETE FROM '.$tableName.'';
+		$wa = [];
+		foreach ($pka as $k){
+			$wa[] = $k.' = ?';//.(++$n);
+			$values[] = $a[$k];
+		}
+		$sql .= ' WHERE '.\implode(' AND ', $wa);
+		$stmt = $this->getLink()->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]);
+		if ($stmt->execute($values)){
+			$this->_setModelSaved($model);
+			return true;
+		}
+		return false;
 	}
 	private static $_opa = [
 		1 => '=',
@@ -168,7 +195,7 @@ class mysqlPdoLink extends link{
 	public function fetch($result){
 		return $result->fetch(\PDO::FETCH_ASSOC);
 	}
-	public function delete($query){
+	public function queryDelete($query){
 		$values = [];
 		$sql = $this->_getSql($query, $values, false, true);
 		$stKey = $sql;

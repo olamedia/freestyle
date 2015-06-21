@@ -43,6 +43,7 @@ class result implements \IteratorAggregate, \Countable{
 		}
 		$cn = $this->_query->getClassName();
 		$a = new $cn($a, true);
+		$a->postLoad();
 		return $a;
 	}
 	public function getIterator(){

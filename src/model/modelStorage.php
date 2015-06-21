@@ -92,8 +92,12 @@ class modelStorage implements \ArrayAccess, \IteratorAggregate, \Countable{
 	public function update($model){
 		$this->_link->update($this, $model);
 	}
-	public function delete(){
-		$this->select()->delete();
+	public function delete($model = null){
+		if (null !== $model){
+			$this->_link->delete($this, $model);
+		}else{
+			$this->select()->delete();
+		}
 	}
 	
 	public function select($what = null){
