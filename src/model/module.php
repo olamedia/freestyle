@@ -15,6 +15,8 @@ $autoload = [
 	
 	'freestyle\\property' => 'property.php',
 	'freestyle\\stringProperty' => 'properties/stringProperty.php',
+	'freestyle\\creationTimestampProperty' => 'properties/creationTimestampProperty.php',
+	'freestyle\\modificationTimestampProperty' => 'properties/modificationTimestampProperty.php',
 	
 	'freestyle\\keyMap' => 'keyMap.php',
 	'freestyle\\propertyMap' => 'propertyMap.php',
